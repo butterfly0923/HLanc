@@ -1394,8 +1394,8 @@ void dsgets ( int nev, int np, double * ritz, double * bounds, double * shifts )
 	delete [] p;
 }
 
-template < typename dcsrmv_operator_t, typename mat_v_t >
-void dsaitr ( int n, int k, int np, double * resid, double & rnorm, mat_v_t & mat_v, double * h, int ldh, dcsrmv_operator_t const & av ) {
+template < typename dspmv_operator_t, typename mat_v_t >
+void dsaitr ( int n, int k, int np, double * resid, double & rnorm, mat_v_t & mat_v, double * h, int ldh, dspmv_operator_t const & av ) {
 	double safmin = dlamch ( "S" );
 	double * ipj = new double[n];
 	double * irj = new double[n];
@@ -1640,8 +1640,8 @@ void dsesrt ( int nconv, double * values, int ncv, double * iq, int ldq ) {
 	delete [] idx;
 }
 
-template < typename dcsrmv_operator_t, typename mat_v_t >
-int ds_solver ( int n, int nev, int ncv, double * values, dcsrmv_operator_t const & av, mat_v_t & mat_v ) {
+template < typename dspmv_operator_t, typename mat_v_t >
+int ds_solver ( int n, int nev, int ncv, double * values, dspmv_operator_t const & av, mat_v_t & mat_v ) {
 	double tol = dlamch ( "E" );
 	double eps23 = pow ( dlamch ( "E" ), c_23 );
 
@@ -1848,10 +1848,10 @@ int ds_solver ( int n, int nev, int ncv, double * values, dcsrmv_operator_t cons
  ** ds_solver_mkl **
  *******************/
 
-template < typename dcsrmv_operator_t >
-int ds_solver_mkl ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dcsrmv_operator_t const & dcsrmv_operator ) {
+template < typename dspmv_operator_t >
+int ds_solver_mkl ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dspmv_operator_t const & dspmv_operator ) {
 	mat_v_mkl_t mat_v ( vectors, ldv, n, ncv );
-	return ds_solver ( n, nev, ncv, values, dcsrmv_operator, mat_v );
+	return ds_solver ( n, nev, ncv, values, dspmv_operator, mat_v );
 }
 
 
@@ -1859,10 +1859,10 @@ int ds_solver_mkl ( int n, int nev, int ncv, double * values, double * vectors, 
  ** ds_solver_gpu **
  *******************/
 
-template < typename dcsrmv_operator_t >
-int ds_solver_gpu ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 ) {
+template < typename dspmv_operator_t >
+int ds_solver_gpu ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dspmv_operator_t const & dspmv_operator, int dev = 0 ) {
 	mat_v_gpu_t mat_v ( vectors, ldv, n, ncv, dev );
-	return ds_solver ( n, nev, ncv, values, dcsrmv_operator, mat_v );
+	return ds_solver ( n, nev, ncv, values, dspmv_operator, mat_v );
 }
 
 
@@ -1870,10 +1870,10 @@ int ds_solver_gpu ( int n, int nev, int ncv, double * values, double * vectors, 
  ** ds_solver_gpu_blocked **
  ***************************/
 
-template < typename dcsrmv_operator_t >
-int ds_solver_gpu_blocked ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 ) {
+template < typename dspmv_operator_t >
+int ds_solver_gpu_blocked ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dspmv_operator_t const & dspmv_operator, int dev = 0 ) {
 	mat_v_gpu_blocked_t mat_v ( vectors, ldv, n, ncv, dev );
-	return ds_solver ( n, nev, ncv, values, dcsrmv_operator, mat_v );
+	return ds_solver ( n, nev, ncv, values, dspmv_operator, mat_v );
 }
 
 

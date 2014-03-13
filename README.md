@@ -14,7 +14,10 @@ from the IRLM solvers, so the solvers can work with any spare matrix format.
 IRLM Solvers
 ------------
 
-The IRLM solvers are implementations of the IRLM algorithm on different hardware platforms. The IRLM solvers execute the sparse matrix-vector multiplication by calling the SPMV operators, and thus contain only dense matrix operations in the algorithm. There are two solvers for double precision symmetric sparse matrix implemented in the HLanc library: ds\_solver\_mkl and ds\_solver\_gpu.
+The IRLM solvers are implementations of the IRLM algorithm on different hardware platforms. The IRLM solvers execute the sparse matrix-vector multiplication by calling the SPMV operators, and thus contain only dense matrix operations in the algorithm. There are two solvers for double precision symmetric sparse matrix implemented in the HLanc library:
+
+    ds_solver_mkl
+    ds_solver_gpu
 
 The ds_solver_mkl calls the BLAS and LAPACK routines in Intel MKL to perform the operations in the algorithm. The ds_solver_gpu calls CUDA kernel functions, CUDA API and cuBLAS to some operations. 
 
