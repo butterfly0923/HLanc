@@ -12,8 +12,8 @@
 #include <mkl.h>
 #include <vector>
 
-#define HLANC_VERSION_MAJOR	0
-#define HLANC_VERSION_MINOR	1
+#define HLANC_VERSION_MAJOR	1
+#define HLANC_VERSION_MINOR	0
 
 #define CEIL_DIV( a, b ) ( ( ( a ) + ( b ) - 1 ) / ( b ) )
 #define MIN(a,b)         ( ( a ) < ( b ) ? ( a ) : ( b ) )

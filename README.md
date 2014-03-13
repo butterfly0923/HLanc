@@ -11,6 +11,19 @@ The SPMV operators hide the details about the storage of sparse matrices
 from the IRLM solvers, so the solvers can work with any spare matrix format.
 
 
+Compiling
+---------
+
+The HLanc library is implemented as a single C++ header file.
+
+CUDA compiler (NVCC) and MKL is needed to compile programs using HLanc.
+
+On the developing machine, source code using HLanc is compiled in the following way:
+
+    $ . /opt/intel/mkl/bin/mklvars.sh intel64
+    $ nvcc -O2 -arch sm_20 -lcublas -lcusparse -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 {source_code_file}
+
+
 IRLM Solvers
 ------------
 
