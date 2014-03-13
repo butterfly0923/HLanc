@@ -34,13 +34,13 @@ The IRLM solvers are implementations of the IRLM algorithm on different hardware
 
 The ds_solver_mkl calls the BLAS and LAPACK routines in Intel MKL to perform the operations in the algorithm. The ds_solver_gpu calls CUDA kernel functions, CUDA API and cuBLAS to some operations. 
 
-    template < typename dcsrmv_operator_t >
+    template < typename dspmv_operator_t >
     int ds_solver_mkl ( int n, int nev, int ncv, double * values, double * vectors, int ldv,
-                        dcsrmv_operator_t const & dcsrmv_operator );
+                        dspmv_operator_t const & dspmv_operator );
 
-    template < typename dcsrmv_operator_t >
+    template < typename dspmv_operator_t >
     int ds_solver_gpu ( int n, int nev, int ncv, double * values, double * vectors, int ldv,
-                        dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 );
+                        dspmv_operator_t const & dspmv_operator, int dev = 0 );
 
 Arguments:
 
@@ -124,9 +124,9 @@ Deprecated
 
 Interfaces and classes listed here are deprecated. They are with performance problem of are for debug purpose.
 
-    template < typename dcsrmv_operator_t >
+    template < typename dspmv_operator_t >
     int ds_solver_gpu_blocked ( int n, int nev, int ncv, double * values, double * vectors, int ldv,
-                                dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 );
+                                dspmv_operator_t const & dspmv_operator, int dev = 0 );
     
     class dcsrmv_operator_naive {
     public:
