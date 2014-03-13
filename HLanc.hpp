@@ -207,7 +207,7 @@ void dcsr_matrix_t::read_mm ( char const * filename ) {
 	if ( 3 != fscanf ( fp, "%d%d%d", &rows, &columns, &entries ) ) {
 		error_exit ( "Error reading rows, columns and entries\n" );
 	}
-	if ( num_columns < columns ) num_columns = columns;
+	num_columns = columns;
 
 	struct line_t {
 		std::vector < int > c;
@@ -1159,6 +1159,7 @@ struct mat_v_gpu_blocked_t {
 		SAFE_CALL ( cudaFree ( p_ncv ) );
 		SAFE_CALL ( cudaFree ( p_n   ) );
 	}
+	void sync_host ( void ) { }
 	void set_column ( double * p, int c ) {
 		memcpy ( v + c * ldv, p, n * sizeof ( double ) );
 	}
@@ -1196,6 +1197,11 @@ struct mat_v_gpu_blocked_t {
 	}
 	void move_columns ( int s, int nc ) {
 		memmove ( v, v + s * ldv, nc * ldv * sizeof ( double ) );
+	}
+	void dorm2r_RN ( int nconv, double * iq, int ldq, double * iw, int * info ) {
+		double * workd = new double[n];
+		dorm2r ( "Right", "Notranspose", &n, &ncv, &nconv, iq, &ldq, iw, v, &ldv, workd, info );
+		delete [] workd;
 	}
 	double * get_base ( void ) {
 		return v;
@@ -1611,18 +1617,18 @@ struct cmp_t {
 	bool operator () ( int l, int r ) const { return p[l] < p[r]; }
 };
 static inline
-void dsesrt ( int nconv, double * value, int ncv, double * iq, int ldq ) {
+void dsesrt ( int nconv, double * values, int ncv, double * iq, int ldq ) {
 	int * idx = new int[nconv];
 	double * qq = new double[ldq * nconv];
 
 	for ( int i = 0; i < nconv; ++i ) {
 		idx[i] = i;
 	}
-	std::sort ( idx + 0, idx + nconv, cmp_t ( value ) );
+	std::sort ( idx + 0, idx + nconv, cmp_t ( values ) );
 
-	memcpy ( qq, value, sizeof ( double ) * nconv );
+	memcpy ( qq, values, sizeof ( double ) * nconv );
 	for ( int i = 0; i < nconv; ++i ) {
-		value[i] = qq[idx[i]];
+		values[i] = qq[idx[i]];
 	}
 
 	memcpy ( qq, iq, sizeof ( double ) * ldq * nconv );
@@ -1634,11 +1640,8 @@ void dsesrt ( int nconv, double * value, int ncv, double * iq, int ldq ) {
 	delete [] idx;
 }
 
-#include "timing.h"
-
 template < typename dcsrmv_operator_t, typename mat_v_t >
-int ds_solver ( int n, int nev, int ncv, double * value, dcsrmv_operator_t const & av, mat_v_t & mat_v ) {
-TIMING_BEGIN;
+int ds_solver ( int n, int nev, int ncv, double * values, dcsrmv_operator_t const & av, mat_v_t & mat_v ) {
 	double tol = dlamch ( "E" );
 	double eps23 = pow ( dlamch ( "E" ), c_23 );
 
@@ -1751,7 +1754,6 @@ TIMING_BEGIN;
 	h[0] = rnorm;
 
 	if ( nconv < nev0 ) return 1;
-TIMING_END ( 0 );
 ///////////////////// for eig vectors ////////////////////
 
 	nev = nev0;
@@ -1822,8 +1824,8 @@ TIMING_END ( 0 );
 		}
 	}
 
-	memcpy ( value, ihd, sizeof ( double ) * nconv );
-	dsesrt ( nconv, value, ncv, iq, ldq );
+	memcpy ( values, ihd, sizeof ( double ) * nconv );
+	dsesrt ( nconv, values, ncv, iq, ldq );
 
 	info = 0;
 	dgeqr2 ( &ncv, &nconv, iq, &ldq, iw, ihb, &info );
@@ -1831,10 +1833,6 @@ TIMING_END ( 0 );
 
 	mat_v.dorm2r_RN ( nconv, iq, ldq, iw, &info );
 	if ( info ) return 1;
-
-TIMING_END ( 1 );
-TIMING_PRINT ( "au+av", 0 );
-TIMING_PRINT ( "eu", 1 );
 
 	mat_v.sync_host ( );
 
@@ -1851,9 +1849,9 @@ TIMING_PRINT ( "eu", 1 );
  *******************/
 
 template < typename dcsrmv_operator_t >
-int ds_solver_mkl ( int n, int nev, int ncv, double * value, double * vector, int ldv, dcsrmv_operator_t const & dcsrmv_operator ) {
-	mat_v_mkl_t mat_v ( vector, ldv, n, ncv );
-	return ds_solver ( n, nev, ncv, value, dcsrmv_operator, mat_v );
+int ds_solver_mkl ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dcsrmv_operator_t const & dcsrmv_operator ) {
+	mat_v_mkl_t mat_v ( vectors, ldv, n, ncv );
+	return ds_solver ( n, nev, ncv, values, dcsrmv_operator, mat_v );
 }
 
 
@@ -1862,9 +1860,9 @@ int ds_solver_mkl ( int n, int nev, int ncv, double * value, double * vector, in
  *******************/
 
 template < typename dcsrmv_operator_t >
-int ds_solver_gpu ( int n, int nev, int ncv, double * value, double * vector, int ldv, dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 ) {
-	mat_v_gpu_t mat_v ( vector, ldv, n, ncv, dev );
-	return ds_solver ( n, nev, ncv, value, dcsrmv_operator, mat_v );
+int ds_solver_gpu ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 ) {
+	mat_v_gpu_t mat_v ( vectors, ldv, n, ncv, dev );
+	return ds_solver ( n, nev, ncv, values, dcsrmv_operator, mat_v );
 }
 
 
@@ -1873,9 +1871,9 @@ int ds_solver_gpu ( int n, int nev, int ncv, double * value, double * vector, in
  ***************************/
 
 template < typename dcsrmv_operator_t >
-int ds_solver_gpu_blocked ( int n, int nev, int ncv, double * value, double * vector, int ldv, dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 ) {
-	mat_v_gpu_blocked_t mat_v ( vector, ldv, n, ncv, dev );
-	return ds_solver ( n, nev, ncv, value, dcsrmv_operator, mat_v );
+int ds_solver_gpu_blocked ( int n, int nev, int ncv, double * values, double * vectors, int ldv, dcsrmv_operator_t const & dcsrmv_operator, int dev = 0 ) {
+	mat_v_gpu_blocked_t mat_v ( vectors, ldv, n, ncv, dev );
+	return ds_solver ( n, nev, ncv, values, dcsrmv_operator, mat_v );
 }
 
 
