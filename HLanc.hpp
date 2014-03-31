@@ -1121,7 +1121,7 @@ struct mat_v_gpu_t {
  *************************/
 
 struct mat_v_gpu_blocked_t {
-	mat_v_gpu_blocked_t ( double * v, int ldv, int n, int ncv, int dev = 0, int buf_size = 0 ) : v ( v ), ldv ( ldv ), n ( n ), ncv ( ncv ), dev ( dev ), buf_size ( buf_size ) {
+	mat_v_gpu_blocked_t ( double * v, int ldv, int n, int ncv, int dev = 0, size_t buf_size = 0 ) : v ( v ), ldv ( ldv ), n ( n ), ncv ( ncv ), dev ( dev ), buf_size ( buf_size ) {
 		SAFE_CALL ( cudaSetDevice ( dev ) );
 		SAFE_CALL ( cudaMalloc ( ( void ** ) &p_n,             n * sizeof ( double ) ) );
 		SAFE_CALL ( cudaMalloc ( ( void ** ) &p_ncv,         ncv * sizeof ( double ) ) );
@@ -1327,7 +1327,7 @@ protected:
 		cublasHandle_t handle;
 		cudaStream_t stream;
 	} buf[2];
-	int buf_size;
+	size_t buf_size;
 
 	cublasHandle_t handle;
 	double * v;
