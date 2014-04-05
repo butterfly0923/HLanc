@@ -3,8 +3,6 @@
 
 #include "../HLanc.hpp"
 
-using namespace HLanc;
-
 struct eigs_t {
 	int nev;
 	int n;
@@ -29,8 +27,7 @@ struct eigs_t {
 		value  = new double[nev];
 		vector = new double[n * nev];
 		for ( int i = 0; i < nev; ++i ) {
-			int ii;
-			if ( 2 != fscanf ( fp, "%d:%lE", &ii, &value[i] ) || ii != i ) {
+			if ( 1 != fscanf ( fp, "%lE", &value[i] ) ) {
 				HLanc::warn ( "Error reading eig value at index %d from \"%s\".\n", i, filename );
 				exit ( 1 );
 			}

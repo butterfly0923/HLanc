@@ -5,7 +5,7 @@ NVCC_LIBS  = -lcublas -lcusparse
 MKL_PATH   = /opt/intel/mkl
 MKL_LIBS   = -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5
 SHELL      = /bin/bash
-PROG       = HLanc_demo HLanc_solver verify_eigs
+PROG       = HLanc_demo HLanc_solver_cpu HLanc_solver_gpu verify_eigs matrix_convertor
 
 default: $(PROG)
 	. $(MKL_PATH)/bin/mklvars.sh intel64;	\
