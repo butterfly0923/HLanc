@@ -934,14 +934,17 @@ struct mat_v_mkl_t {
 	}
 	void dorm2r_RN ( int nconv, double * iq, int ldq, double * iw, int * info ) {
 		double * workd = new double[n];
-		dorm2r ( "Right", "Notranspose", &n, &ncv, &nconv, iq, &ldq, iw, v, &ldv, workd, info );
+		int _n   = n;
+		int _ncv = ncv;
+		int _ldv = ldv;
+		dorm2r ( "Right", "Notranspose", &_n, &_ncv, &nconv, iq, &ldq, iw, v, &_ldv, workd, info );
 		delete [] workd;
 	}
 
 	double * v;
-	int ldv;
-	int n;
-	int ncv;
+	size_t ldv;
+	size_t n;
+	size_t ncv;
 };
 
 
@@ -1108,10 +1111,10 @@ struct mat_v_gpu_t {
 	double * v_d;
 	double * p_n;
 	double * p_ncv;
-	int ldv;
-	int ldv_d;
-	int n;
-	int ncv;
+	size_t ldv;
+	size_t ldv_d;
+	size_t n;
+	size_t ncv;
 	int dev;
 };
 
@@ -1200,7 +1203,10 @@ struct mat_v_gpu_blocked_t {
 	}
 	void dorm2r_RN ( int nconv, double * iq, int ldq, double * iw, int * info ) {
 		double * workd = new double[n];
-		dorm2r ( "Right", "Notranspose", &n, &ncv, &nconv, iq, &ldq, iw, v, &ldv, workd, info );
+		int _n   = n;
+		int _ncv = ncv;
+		int _ldv = ldv;
+		dorm2r ( "Right", "Notranspose", &_n, &_ncv, &nconv, iq, &ldq, iw, v, &_ldv, workd, info );
 		delete [] workd;
 	}
 	double * get_base ( void ) {
@@ -1333,9 +1339,9 @@ protected:
 	double * v;
 	double * p_ncv;
 	double * p_n;
-	int ldv;
-	int n;
-	int ncv;
+	size_t ldv;
+	size_t n;
+	size_t ncv;
 	int dev;
 };
 

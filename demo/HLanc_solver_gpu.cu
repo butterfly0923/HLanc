@@ -40,7 +40,7 @@ int main ( int argc, char * argv[] ) {
 	print_matrix_info ( dcsr_matrix );
 	HLanc::warn ( "Constructing a GPU CSRMV operator ...\n" );
 	HLanc::dcsrmv_operator_gpu op ( dcsr_matrix, dev_csrmv );
-	HLanc::warn ( "Computing the first %d eigenvalue and eigenvectors ...\n" );
+	HLanc::warn ( "Computing the first %d eigenvalue and eigenvectors ...\n", nev );
 
 	int n = dcsr_matrix.get_num_rows ( );
 	double * values  = new double[ncv];
